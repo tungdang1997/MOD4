@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Testing file upload</title>
+</head>
+<body>
+<input type="file" id="fileButton" onchange="uploadImage(event)">
+<h1>Hello GFG</h1>
+<div id="imgDiv"></div>
+<script src="https://www.gstatic.com/firebasejs/4.2.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyBu3P7EVxPNTtF9ODqxyH8xxKeIB0dQCs8",
+    authDomain: "shopping-b8e86.firebaseapp.com",
+    projectId: "shopping-b8e86",
+    storageBucket: "shopping-b8e86.appspot.com",
+    messagingSenderId: "66743654730",
+    appId: "1:66743654730:web:aacf22e730bce131bd09b3",
+    measurementId: "G-T5WY0WW1JE"
+  };
+  firebase.initializeApp(firebaseConfig);
+</script>
+
+<script type="text/javascript">
+  function uploadImage(e) {
+    let fbBucketName = 'images';
+    let uploader = document.getElementById('uploader');
+    let file = e.target.files[0];
+    let storageRef = firebase.storage().ref(`${fbBucketName}/${file.name}`);
+    let uploadTask = storageRef.put(file);
+    uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
+            function (snapshot) {
+              uploader.value = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              switch (snapshot.state) {
+                case firebase.storage.TaskState.PAUSED:
+                  break;
+                case firebase.storage.TaskState.RUNNING:
+                  break;
+              }
+            }, function (error) {
+              switch (error.code) {
+                case 'storage/unauthorized':
+                  break;
+                case 'storage/canceled':
+                  break;
+                case 'storage/unknown':
+                  break;
+              }
+            }, function () {
+              let downloadURL = uploadTask.snapshot.downloadURL;
+              document.getElementById('imgDiv').innerHTML = `<img src="${downloadURL}" alt="">`
+              localStorage.setItem('image', downloadURL);
+            });
+  }
+</script>
+
+</body>
+
+</html>
