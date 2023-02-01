@@ -1,5 +1,3 @@
-showListHome();
-showHome()
 
 function showListHome() {
     $.ajax({
@@ -7,7 +5,7 @@ function showListHome() {
         url: 'http://localhost:8080/products',
         headers: {
             'Content-Type': 'application/json',
-
+              Authorization: 'Bearer ' + localStorage.getItem('token')
         },
 
         success: (products) => {
@@ -42,7 +40,7 @@ function showListHome() {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="remove('${item.id}')">Save changes</button>
+                <button type="button" class="btn btn-primary" onclick="remove('${item.id}')">Delete</button>
             </div>
         </div>
     </div>
@@ -104,37 +102,6 @@ function uploadImage(e) {
         });
 }
 
-// function uploadImageEdit(e, id) {
-//     let fbBucketName = 'images';
-//     let uploader = document.getElementById('uploader');
-//     let file = e.target.files[0];
-//     let storageRef = firebase.storage().ref(`${fbBucketName}/${file.name}`);
-//     let uploadTask = storageRef.put(file);
-//     uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
-//         function (snapshot) {
-//             uploader.value = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-//             switch (snapshot.state) {
-//                 case firebase.storage.TaskState.PAUSED:
-//                     break;
-//                 case firebase.storage.TaskState.RUNNING:
-//                     break;
-//             }
-//         }, function (error) {
-//             switch (error.code) {
-//                 case 'storage/unauthorized':
-//                     break;
-//                 case 'storage/canceled':
-//                     break;
-//                 case 'storage/unknown':
-//                     break;
-//             }
-//         }, function () {
-//             let downloadURL = uploadTask.snapshot.downloadURL;
-//             document.getElementById('imgDiv').innerHTML = `<img src="${downloadURL}" alt="downloadURL">`
-//             localStorage.setItem('image', downloadURL);
-//         });
-// }
-
 function showFromEdit(id) {
     $.ajax({
         type: 'GET',
@@ -181,8 +148,6 @@ function showHome() {
     showListHome()
 }
 
-
-
 function add() {
     let name = $('#name').val();
     let price = $('#price').val();
@@ -199,7 +164,7 @@ function add() {
         url: 'http://localhost:8080/products',
         headers: {
             'Content-Type': 'application/json',
-
+            Authorization: 'Bearer ' + localStorage.getItem('token')
         },
         data: JSON.stringify(product),
         success: () => {
@@ -224,7 +189,7 @@ function edit(id) {
         url: `http://localhost:8080/products/${id}`,
         headers: {
             'Content-Type': 'application/json',
-
+            Authorization: 'Bearer ' + localStorage.getItem('token')
         },
         data: JSON.stringify(product),
         success: () => {
@@ -240,10 +205,11 @@ function remove(id) {
         url: `http://localhost:8080/products/${id}`,
         headers: {
             'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + localStorage.getItem('token')
         },
         success: () => {
-            alert('xoa xong!')
-            showHome()
+            alert('xoa xong!');
+            showHome();
         }
     })
 }
@@ -254,6 +220,7 @@ function getCategoriesCreate() {
         url: 'http://localhost:8080/products/getCategories',
         headers: {
             'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + localStorage.getItem('token')
         },
         success: (categories) => {
             console.log(categories)
@@ -266,4 +233,150 @@ function getCategoriesCreate() {
             $('#category').html(Categories);
         }
     })
+}
+
+function searchProduct(value) {
+    let name = value.toLowerCase()
+    $('#body').html(`
+    <table border="1">
+        <thead>
+        <tr>
+            <td>Id</td>
+            <td>Name</td>
+            <td>Price</td>
+            <td>Image</td>
+            <td>Category</td>
+            <td colspan="2">Action</td>
+        </tr>
+        </thead>
+        <tbody id="tbody">
+
+        </tbody>
+
+
+    </table>
+    `)
+    $.ajax({
+        type: 'GET',
+        url: `http://localhost:8080/products/find-name?name=${name}`,
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + localStorage.getItem('token')
+        },
+        data: JSON.stringify(name),
+        success: (products) => {
+            let html = '';
+
+            products.map(item => {
+                html += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.price}</td>
+                        <td><img src="${item.image}" width="200px"></td>
+                        <td>${item.nameCategory}</td>
+                        <td>
+                        <!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#deleteModal${item.id}">
+    Delete
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteModal${item.id}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">${item.name}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="remove('${item.id}')">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+                           
+                        </td>
+                        <td><button onclick="showFromEdit('${item.id}')">Edit</button>
+                       
+                     </tr>
+`
+            })
+            $('#tbody').html(html)
+        }
+    })
+}
+
+function login(){
+    let username = $('#username').val();
+    let password = $('#password').val();
+    let user = {
+        username: username,
+        password: password
+    }
+    $.ajax({
+        type: 'POST',
+        url: 'http://localhost:8080/auth/login',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: JSON.stringify(user),
+        success: (token) => {
+            localStorage.setItem('token',token)
+            showHome();
+            showLoginRegister();
+        }
+    })
+}
+
+function showFromLogin(){
+
+        $('#nav').html(`
+    <input type="text" id="username" placeholder="Username" name="username">
+    <input type="number" id="password" placeholder="Password" name="password">
+    
+    <button onclick="login()">Login</button>
+`)
+}
+
+function showFromRegister(){
+
+    $('#nav').html(`
+    <input type="text" id="username" placeholder="Username" name="username">
+    <input type="number" id="password" placeholder="Password" name="password">
+    
+    <button onclick="register()">Register</button>
+`)
+}
+
+function register(){
+    let username = $('#username').val();
+    let password = $('#password').val();
+    let user = {
+        username: username,
+        password: password
+    }
+    $.ajax({
+        type: 'POST',
+        url: 'http://localhost:8080/auth/register',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: JSON.stringify(user),
+        success: () => {
+            showFromLogin()
+        }
+    })
+}
+
+function logOut(){
+    localStorage.clear();
+    showHome()
+    showLoginRegister()
 }
