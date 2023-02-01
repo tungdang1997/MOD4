@@ -328,9 +328,16 @@ function login(){
         },
         data: JSON.stringify(user),
         success: (token) => {
-            localStorage.setItem('token',token)
-            showHome();
-            showLoginRegister();
+            if (token === 'Wrong password'){
+                alert('cut')
+                showLoginRegister();
+            }else {
+                localStorage.setItem('token',token)
+                showHome();
+                showLoginRegister();
+            }
+
+
         }
     })
 }

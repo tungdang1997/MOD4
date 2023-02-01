@@ -2,7 +2,13 @@ showLoginRegister();
 
 function showLoginRegister() {
     let token = localStorage.getItem('token')
-    if (token) {
+    if (!token || token === 'fail') {
+        $('#nav').html(`
+    <button onclick="showFromLogin()">Dang nhap</button>
+    <button onclick="showFromRegister()">Dang ky</button>
+    `)
+    } else {
+
         $('#nav').html(`
         <button onclick="showHome()">Trang chu</button>
         <button onclick="showFromAdd()">Them moi</button>
@@ -10,12 +16,6 @@ function showLoginRegister() {
         <input type="text" onkeyup="searchProduct(this.value)" placeholder="Tim kiem...">
     
      `)
-    } else {
-        $('#nav').html(`
-    <button onclick="showFromLogin()">Dang nhap</button>
-    <button onclick="showFromRegister()">Dang ky</button>
-    `)
-
     }
 
 }
