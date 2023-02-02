@@ -272,12 +272,13 @@ function searchProduct(value) {
 
     </table>
     `)
+    let token = JSON.parse(localStorage.getItem('token'))
     $.ajax({
         type: 'GET',
         url: `http://localhost:8080/products/find-name?name=${name}`,
         headers: {
             'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + localStorage.getItem('token')
+            Authorization: 'Bearer ' + token.token
         },
         data: JSON.stringify(name),
         success: (products) => {
