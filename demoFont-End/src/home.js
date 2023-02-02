@@ -1,18 +1,19 @@
 
 function showListHome() {
+    let token = JSON.parse(localStorage.getItem('token'))
     $.ajax({
         type: 'GET',
         url: 'http://localhost:8080/products',
         headers: {
             'Content-Type': 'application/json',
-              Authorization: 'Bearer ' + localStorage.getItem('token')
+              Authorization: 'Bearer ' + token.token
         },
 
         success: (products) => {
             let html = '';
-
-            products.map(item => {
-                html += `
+            if (token.role === 'admin'){
+                products.map(item => {
+                    html += `
                     <tr>
                         <td>${item.id}</td>
                         <td>${item.name}</td>
@@ -50,8 +51,23 @@ function showListHome() {
                         <td><button onclick="showFromEdit('${item.id}')">Edit</button>
                        
                      </tr>
-`
-            })
+                `})
+            }
+            else {
+                products.map(item => {
+                    html += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.price}</td>
+                        <td><img src="${item.image}" width="200px"></td>
+                        <td>${item.nameCategory}</td>
+                        <td><button onclick="showFromEdit('${item.id}')">Buy</button></td>
+                       
+                     </tr>
+                `})
+            }
+
             $('#tbody').html(html)
         }
     })
@@ -328,11 +344,12 @@ function login(){
         },
         data: JSON.stringify(user),
         success: (token) => {
+            console.log(token)
             if (token === 'Wrong password'){
                 alert('cut')
                 showLoginRegister();
             }else {
-                localStorage.setItem('token',token)
+                localStorage.setItem('token',JSON.stringify(token));
                 showHome();
                 showLoginRegister();
             }
@@ -384,6 +401,6 @@ function register(){
 
 function logOut(){
     localStorage.clear();
-    showHome()
+    // showHome()
     showLoginRegister()
 }

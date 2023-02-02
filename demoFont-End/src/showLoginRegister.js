@@ -2,7 +2,7 @@ showLoginRegister();
 
 function showLoginRegister() {
     let token = localStorage.getItem('token')
-    if (!token || token === 'fail') {
+    if (!token || token === 'Wrong password') {
         $('#nav').html(`
     <button onclick="showFromLogin()">Dang nhap</button>
     <button onclick="showFromRegister()">Dang ky</button>
